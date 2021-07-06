@@ -87,6 +87,46 @@ export default class TutorialsList extends Component{
 
     render() {
         const { searchTitle, tutorials, currentTutorial, currentIndex} = this.state;
+
+        return(
+            <div className="list row">
+                <div className="col-md-8">
+                    <div className="input-group mb-3">
+                        <input 
+                         type="text"
+                         className="form-control"
+                         placeholder="Search by title"
+                         value={searchTitle}
+                         onChange={this.onChangeSearchTitle}/>
+                         <div className="input-group-append">
+                            <button 
+                            className="btn btn-outline-secondary"
+                            type="button"
+                            onClick={this.searchTitle}
+                            >
+                            Search
+                            </button>
+                         </div>
+                    </div>
+                </div>
+                <div className="col-md-6">
+                    <h4>Tutorial List</h4>
+                    <ul className="list-group">
+                        {
+                            tutorials && tutorials.map((tutorial, index) =>(
+                                <li className={
+                                    "list-group-item "+(index === currentIndex ? "active" : "")
+                                }
+                                onClick={() => this.setActiveTutorial(tutorial,index)}
+                                key={index}
+                                >
+                                    {tutorial.title}
+                                </li>
+                            )) }
+                    </ul>
+                </div>
+            </div>
+        )
     }
 
 }
