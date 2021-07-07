@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import TutorialDataService from "../services/tutorial.service";
 import { Link } from "react-router-dom";
-
+import Pagination from "@material-ui/lab/Pagination";
 
 export default class TutorialsList extends Component {
     constructor(props) {
@@ -11,14 +11,24 @@ export default class TutorialsList extends Component {
         this.refreshList = this.refreshList.bind(this);
         this.setActiveTutorial = this.setActiveTutorial.bind(this);
         this.removeAllTutorials = this.removeAllTutorials.bind(this);
-        this.searchTitle = this.searchTitle.bind(this);
+        this.handlePageChange = this.handlePageChange.bind(this);
+        this.handlePageSizeChange = this.handlePageSizeChange.bind(this);
+
+
+        //this.searchTitle = this.searchTitle.bind(this);
 
         this.state = {
             tutorials: [],
             currentTutorial: null,
             currentIndex: -1,
-            searchTitle: ""
+            searchTitle: "",
+
+            page: 1,
+            count: 0,
+            pageSize: 3,
         };
+
+        this.pageSizes = [3, 6, 9];
     }
 
     componentDidMount() {
@@ -33,13 +43,38 @@ export default class TutorialsList extends Component {
         });
     }
 
+    getRequestParams(searchTitle, page, pageSize) {
+        let params = {};
+
+        if (searchTitle) {
+            params["title"] = searchTitle;
+        }
+
+        if (page) {
+            params["page"] = page - 1;
+        }
+
+        if (pageSize) {
+            params["size"] = pageSize;
+        }
+
+        return params;
+    }
+ 
     retrieveTutorials() {
-        TutorialDataService.getAll()
-            .then(res => {
+        const { searchTitle, page, pageSize } = this.state;
+        console.log('searchTitle',searchTitle,'page',page,'pageSize',pageSize);
+        const params = this.getRequestParams(searchTitle, page, pageSize);
+
+        TutorialDataService.getAll(params)
+            .then((response) => {
+              
+                const { tutorials,totalPages } = response.data;
                 this.setState({
-                    tutorials: res.data
+                    tutorials: tutorials,
+                    count: totalPages,
                 });
-                console.log(res.data);
+                console.log('result', response.data); 
             })
             .catch(e => {
                 console.log(e);
@@ -72,21 +107,48 @@ export default class TutorialsList extends Component {
             });
     }
 
-    searchTitle() {
-        TutorialDataService.findByTitle(this.state.searchTitle)
-            .then(res => {
-                this.setState({
-                    tutorials: res.data
-                })
-                console.log(res.data);
-            })
-            .catch(e => {
-                console.log(e);
-            })
+    // searchTitle() {
+    //     TutorialDataService.findByTitle(this.state.searchTitle)
+    //         .then(res => {
+    //             this.setState({
+    //                 tutorials: res.data
+    //             })
+    //             console.log(res.data);
+    //         })
+    //         .catch(e => {
+    //             console.log(e);
+    //         })
+    // }
+
+    handlePageChange(event, value) {
+        console.log('value', value);
+        this.setState({
+            page: value,
+        },
+            () => {
+                this.retrieveTutorials();
+            });
     }
 
+    handlePageSizeChange(event) {
+        this.setState(
+            {
+                pageSize: event.target.value,
+                page: 1
+            },
+            () => {
+                this.retrieveTutorials();
+            }
+        );
+    }
     render() {
-        const { searchTitle, tutorials, currentTutorial, currentIndex } = this.state;
+        const { searchTitle,
+            tutorials,
+            currentTutorial,
+            currentIndex,
+            page,
+            count,
+            pageSize } = this.state;
 
         return (
             <div className="list row">
@@ -102,7 +164,8 @@ export default class TutorialsList extends Component {
                             <button
                                 className="btn btn-outline-secondary"
                                 type="button"
-                                onClick={this.searchTitle}
+                               
+                                onClick={this.retrieveTutorials}
                             >
                                 Search
                             </button>
@@ -111,6 +174,31 @@ export default class TutorialsList extends Component {
                 </div>
                 <div className="col-md-6">
                     <h4>Tutorial List</h4>
+
+                    <div className="mt-3">
+                        {"Items per Page: "}
+                        <select onChange={this.handlePageSizeChange} value={pageSize}>
+                            {
+                                this.pageSizes.map((size) => (
+                                    <option key={size} value={size}>
+                                        {size}
+                                    </option>
+                                ))}
+                        </select>
+                        {console.log('count',count,'page',page)}
+                        <Pagination
+                            className="mt-3"
+                            count={count}
+                            page={page}
+                            siblingCount={1}
+                            boundaryCount={1}
+                            variant="outlined"
+                            shape="rounded"
+                            onChange={this.handlePageChange}
+                        />
+                    </div>
+
+
                     <ul className="list-group">
                         {
                             tutorials && tutorials.map((tutorial, index) => (
