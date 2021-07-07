@@ -39,16 +39,16 @@ export default class AddTutorial extends Component{
         };
 
         TutorialService.create(data)
-        .then(response => {
+        .then(res => {
             this.setState({
-                id: response.data.id,
-                title: response.data.title,
-                description: response.data.description,
-                published:response.data.published,
+                id: res.data.id,
+                title: res.data.title,
+                description: res.data.description,
+                published:res.data.published,
 
                 submitted:true
             });
-            console.log(response.data);
+            console.log(res.data);
         })
         .catch(e => {
             console.log(e);
@@ -56,7 +56,7 @@ export default class AddTutorial extends Component{
     }
 
     newTutorial() {
-        this.state({
+        this.setState({
             id:null,
             title: "",
             description: "",
@@ -100,7 +100,7 @@ export default class AddTutorial extends Component{
                         />
                     </div>
 
-                    <button onClick={this.saveTutorial} className="btn btn-sucess">Submit</button>
+                    <button onClick={this.saveTutorial} className="btn btn-success">Submit</button>
 
                 </div>
             )}

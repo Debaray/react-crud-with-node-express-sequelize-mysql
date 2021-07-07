@@ -1,5 +1,5 @@
-import { response } from "express";
-import React, {Component} from "react";
+
+import React, { Component } from "react";
 import TutorialService from "../services/tutorial.service";
 
 export default class Tutorial extends Component {
@@ -13,7 +13,7 @@ export default class Tutorial extends Component {
         this.deleteTutorial = this.deleteTutorial.bind(this);
 
         this.state = {
-            currentTutorial:{
+            currentTutorial: {
                 id: null,
                 title: "",
                 description: "",
@@ -23,14 +23,14 @@ export default class Tutorial extends Component {
         };
     }
 
-    componentDidMount(){
+    componentDidMount() {
         this.getTutorial(this.props.match.params.id);
     }
 
-    onChangeTitle(e){
+    onChangeTitle(e) {
         const title = e.target.value;
 
-        this.setState(function(prevState){
+        this.setState(function (prevState) {
             return {
                 currentTutorial: {
                     ...prevState.currentTutorial,
@@ -40,52 +40,153 @@ export default class Tutorial extends Component {
         });
     }
 
-    onChangeDescription(e){
+    onChangeDescription(e) {
         const description = e.target.value;
-        
-        this.setState(prevState =>({
+
+        this.setState(prevState => ({
             currentTutorial: {
                 ...prevState.currentTutorial,
-                description:description
+                description: description
             }
         }))
     }
 
-    getTutorial(id){
+    getTutorial(id) {
         TutorialService.get(id)
-        .then(response => {
-            this.setState({
-                currentTutorial:response.data
-            });
-            console.log(response.data);
-        })
-        .catch(e => {
-            console.log(e);
-        })
+            .then(res => {
+                this.setState({
+                    currentTutorial: res.data
+                });
+                console.log(res.data);
+            })
+            .catch(e => {
+                console.log(e);
+            })
     }
 
-    updatePublished(status){
-        var data ={
+    updatePublished(status) {
+        var data = {
             id: this.state.currentTutorial.id,
             title: this.state.currentTutorial.title,
-            description:this.state.currentTutorial.description,
+            description: this.state.currentTutorial.description,
             published: status
         };
 
         TutorialService.update(this.state.currentTutorial.id, data)
-        .then(response => {
-             this.setState(prevState =>({
+            .then(res => {
+                this.setState(prevState => ({
 
-                currentTutorial:{
-                    ...prevState.currentTutorial,
-                    published:status
-                }
-             }))
-        })
-        .catch(e => {
-            console.log(e);
-        });
+                    currentTutorial: {
+                        ...prevState.currentTutorial,
+                        published: status
+                    }
+                }))
+            })
+            .catch(e => {
+                console.log(e);
+            });
     }
 
-    
+    updateTutorial() {
+        TutorialService.update(this.state.currentTutorial.id,
+            this.state.currentTutorial)
+            .then(res => {
+                console.log(res.data);
+                this.setState({
+                    message: " The tutorial was updated successfully!"
+                });
+            })
+            .catch(e => {
+                console.log(e);
+            })
+    }
+
+    deleteTutorial() {
+        TutorialService.delete(this.state.currentTutorial.id)
+            .then(res => {
+                console.log(res.data);
+                this.props.history.push('/tutorials')
+            })
+            .catch(e => {
+                console.log(e);
+            })
+    }
+
+    render() {
+        const { currentTutorial } = this.state;
+        return (
+            <div>
+                {
+                    currentTutorial ? (
+                        <div className="edit-form">
+                            <h4>Tutorial</h4>
+                            <form>
+                                <div className="form-group">
+                                    <label htmlFor="title">Title</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        id="title"
+                                        value={currentTutorial.title}
+                                        onChange={this.onChangeTitle} />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="description">Description</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        id="description"
+                                        value={currentTutorial.description}
+                                        onChange={this.onChangeDescription} />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>
+                                        <strong>Status : </strong>
+                                    </label>
+                                    {currentTutorial.published ? "Published" : "Pending"}
+                                </div>
+                            </form>
+                            {
+                                currentTutorial.published ? (
+                                    <button
+                                        className="badge bg-primary mr-2"
+                                        onClick={() => this.updatePublished(false)}>
+                                        UnPublish
+                                    </button>
+                                ) : (
+                                    <button
+                                        className="badge bg-primary mr-2"
+                                        onClick={() => this.updatePublished(true)}>
+                                        Publish
+                                    </button>
+                                )
+
+                            }
+                            <button
+                                className="badge bg-danger mr-2"
+                                onClick={this.deleteTutorial}>
+                                Delete
+                            </button>
+
+                            <button
+                                type="submit"
+                                className="badge bg-success"
+                                onClick={this.updateTutorial}>
+                                Update
+                            </button>
+                            <p>{this.state.message}</p>
+                        </div>
+                    ) : (
+                        <div>
+                            <br />
+                            <p>Please click on a tutorial</p>
+                        </div>
+                    )
+                }
+            </div>
+        )
+    }
+
+
 }

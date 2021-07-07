@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import TutorialDataService from "../services/tutorial.service";
 import { Link } from "react-router-dom";
-import { response } from "express";
+
 
 export default class TutorialsList extends Component {
     constructor(props) {
@@ -35,11 +35,11 @@ export default class TutorialsList extends Component {
 
     retrieveTutorials() {
         TutorialDataService.getAll()
-            .then(response => {
+            .then(res => {
                 this.setState({
-                    tutorials: response.data
+                    tutorials: res.data
                 });
-                console.log(response.data);
+                console.log(res.data);
             })
             .catch(e => {
                 console.log(e);
@@ -63,8 +63,8 @@ export default class TutorialsList extends Component {
 
     removeAllTutorials() {
         TutorialDataService.deleteAll()
-            .then(response => {
-                console.log(response.data);
+            .then(res => {
+                console.log(res.data);
                 this.refreshList();
             })
             .catch(e => {
@@ -74,11 +74,11 @@ export default class TutorialsList extends Component {
 
     searchTitle() {
         TutorialDataService.findByTitle(this.state.searchTitle)
-            .then(response => {
+            .then(res => {
                 this.setState({
-                    tutorials: response.data
+                    tutorials: res.data
                 })
-                console.log(response.data);
+                console.log(res.data);
             })
             .catch(e => {
                 console.log(e);
